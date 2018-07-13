@@ -9,11 +9,12 @@ using namespace boost::numeric::odeint;
 using namespace std;
 
 int main(int ac, char *av[]) {
-const size_t N=3;
-  QVoter ode(4);
+const size_t kmax=10;
+const unsigned Q=4;
+  QVoter ode(kmax, Q);
   ode.set_p(0.1);
   Observer obs;
-  container_type x(3*N);
+  container_type x(3*kmax);
 
 generate(begin(x), end(x), [](){return 0.1;});
 
