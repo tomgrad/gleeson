@@ -1,6 +1,7 @@
 
 CXX=g++
-CXXFLAGS = --std=c++17 -O3 -march=native
+# CXXFLAGS = --std=c++17 -O3 -march=native
+CXXFLAGS = -g
 CXXFLAGS += -I/home/tomgrad/include
 
 qvoter : main.o
