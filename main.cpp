@@ -1,7 +1,7 @@
 #include <algorithm>
 #include <boost/numeric/odeint.hpp>
 #include <iostream>
-
+#include <cli_parser.h>
 #include "qvoter.h"
 
 using namespace boost::numeric::odeint;
@@ -9,13 +9,17 @@ using namespace std;
 
 int main(int ac, char *av[])
 {
-  const size_t kmax = 50;
-  const unsigned Q = 8;
+  cli_parser p(ac, av);
+
+  const auto kmax = p.get<unsigned>("kmax",50);
+  const auto Q = p.get<unsigned>("q",4);
+  auto P=p.get<double>("p",0);
+  auto init=p.get<double>("init",0.5);
   QVoter ode(kmax, Q);
-  ode.set_p(0.07);
+  ode.set_p(P);
 
   double_v x(3 * kmax);
-  generate(begin(x), end(x), []() { return 0.1; });
+  generate(begin(x), end(x), [&]() { return init; });
 // x[3*(kmax-1)]=0.5;
 // x[3*(kmax-1)+1]=0.5;
 // x[3*(kmax-1)+2]=0.5;
