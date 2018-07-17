@@ -12,7 +12,7 @@ int main(int ac, char *av[])
 {
   cli_parser p(ac, av);
 
-  const auto stable = p.get_flag("stable");
+  const auto steady = p.get_flag("steady");
   const auto unstable = p.get_flag("unstable");
 
   const auto kmax = p.get<unsigned>("kmax", 1000);
@@ -40,33 +40,61 @@ int main(int ac, char *av[])
     return r;
   };
 
-  if (stable)
+  if (steady)
   {
-    double delta = 0.001;
+    double delta = 0.0001;
     double px = 0;
     T = 100;
 
-    set_ic(0.999);
-    while (fabs(px - rho(x)) > delta)
+    double xs1 = 0.999;
+    set_ic(xs1);
+    while (fabs(px - xs1) > delta)
     {
-      px = rho(x);
+      px = xs1;
       integrate_const(runge_kutta4<double_v>(), ref(ode), x, 0.0, T, dt);
+      xs1 = rho(x);
     }
-    cout << P << "\t" << px << endl;
 
-    set_ic(0.49);
+    cout << P << "\t" << xs1 << "\t1" << endl;
+
+    double xs2 = 0.499;
+    set_ic(xs2);
     px = 0;
-    while (fabs(px - rho(x)) > delta)
+    while (fabs(px - xs2) > delta)
     {
-      px = rho(x);
+      px = xs2;
       integrate_const(runge_kutta4<double_v>(), ref(ode), x, 0.0, T, dt);
+      xs2 = rho(x);
     }
-    if (px > 0.49)
-      cout << P << "\t" << px << endl;
-  }
+    if (xs2 < 0.499)
+    {
+      xs2 = xs1;
+      cout << P << "\t"
+           << "0.5"
+           << "\t0" << endl;
+    }
+    else
+    {
+      double ux;
+      cout << P << "\t" << xs2 << "\t1" << endl;
 
-  else if (unstable)
-  {
+      if (xs1 - xs2 > delta)
+      {
+
+        while (xs1 - xs2 > delta)
+        {
+          ux = (xs1 + xs2) / 2;
+          set_ic(ux);
+          integrate_const(runge_kutta4<double_v>(), ref(ode), x, 0.0, T, dt);
+          if (rho(x) < ux)
+            xs2 = ux;
+          else
+            xs1 = ux;
+        }
+
+        cout << P << "\t" << xs2 << "\t0" << endl;
+      }
+    }
   }
 
   else
