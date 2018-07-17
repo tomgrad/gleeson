@@ -10,7 +10,7 @@ typedef std::vector<double> double_v;
 class QVoter
 {
 public:
-  QVoter(const size_t k_, const unsigned q_) : q(q_), kmax(k_)
+  QVoter(const size_t kmin_, const size_t kmax_, const unsigned q_) : q(q_), kmax(kmax_), kmin(kmin_)
   {
     FB.resize(kmax);
     RB.resize(kmax);
@@ -22,7 +22,7 @@ public:
                   const double /* t */)
   {
     coefs(x);
-    for (size_t i = 0; i < kmax; ++i)
+    for (size_t i = kmin - 1; i < kmax; ++i)
     {
       auto const rk = x[3 * i];
       auto const pk = x[3 * i + 1];
@@ -34,7 +34,7 @@ public:
       // auto tmp2=- pk * rk / (1 - rk) * RB[i];
       // auto tmp3=- mFB[i] / k;
       // auto tmp4=rk / (1 - rk) / k * mRB[i];
-      
+
       // dxdt[3 * i + 1] = tmp1+tmp2+tmp3+tmp4 + bs * (1 - pk) - gs * pk;
       dxdt[3 * i + 1] = pk * FB[i] - pk * rk / (1 - rk) * RB[i] - mFB[i] / k + rk / (1 - rk) / k * mRB[i] + bs * (1 - pk) - gs * pk;
 
@@ -42,32 +42,44 @@ public:
     }
   }
 
-  double P(const unsigned k)
+  double P(const unsigned k) const
   {
     // random regular
-    if (k == kmax)
-      return 1;
-    else
-      return 0.0;
+    // if (k == kmax)
+    //   return 1;
+    // else
+    //   return 0.0;
+    return pow(k, -gamma) / norm;
 
     // return 1.0/kmax;
   }
   void set_p(double p_) { p = p_; }
+  void set_gamma(double g_)
+  {
+    gamma = g_;
+    double sum=0;
+    for (auto k = kmin; k <= kmax; ++k)
+      sum += P(k);
+    norm = sum;
+  }
 
 private:
   size_t kmax;
+  size_t kmin;
+  double norm = 1; // P(k) norm
+  double gamma = 3;
   unsigned q;
-  double p=0.1;
+  double p = 0.1;
   double bs, bi, gs, gi;
   std::vector<double> FB, RB, mFB, mRB;
 
   void coefs(const double_v &x)
   {
-//    double sFB = 0, sRB = 0, smFB = 0, smRB = 0;
+    //    double sFB = 0, sRB = 0, smFB = 0, smRB = 0;
 
     bs = bi = gs = gi = 0;
     double mbs = 0, mbi = 0, mgs = 0, mgi = 0;
-    for (size_t i = 0; i < kmax; ++i)
+    for (size_t i = kmin - 1; i < kmax; ++i)
     {
       auto const rk = x[3 * i];
       auto const pk = x[3 * i + 1];
