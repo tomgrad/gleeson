@@ -4,6 +4,7 @@
 #include <cmath>
 #include <vector>
 #include <iostream>
+using std::cout;
 using std::pow;
 
 typedef std::vector<double> double_v;
@@ -30,12 +31,7 @@ public:
       double k = 1.0 + i;
 
       dxdt[3 * i] = -rk * RB[i] + (1 - rk) * FB[i];
-      // auto tmp1=pk * FB[i];
-      // auto tmp2=- pk * rk / (1 - rk) * RB[i];
-      // auto tmp3=- mFB[i] / k;
-      // auto tmp4=rk / (1 - rk) / k * mRB[i];
-
-      // dxdt[3 * i + 1] = tmp1+tmp2+tmp3+tmp4 + bs * (1 - pk) - gs * pk;
+     
       dxdt[3 * i + 1] = pk * FB[i] - pk * rk / (1 - rk) * RB[i] - mFB[i] / k + rk / (1 - rk) / k * mRB[i] + bs * (1 - pk) - gs * pk;
 
       dxdt[3 * i + 2] = qk * RB[i] - qk / rk * (1 - rk) * FB[i] - mRB[i] / k + (1 - rk) / rk / k * mFB[i] + bi * (1 - qk) - gi * qk;
@@ -44,14 +40,7 @@ public:
 
   double P(const unsigned k) const
   {
-    // random regular
-    // if (k == kmax)
-    //   return 1;
-    // else
-    //   return 0.0;
     return pow(k, -gamma) / norm;
-
-    // return 1.0/kmax;
   }
   void set_p(double p_) { p = p_; }
   void set_gamma(double g_)
@@ -66,8 +55,8 @@ public:
 private:
   size_t kmax;
   size_t kmin;
-  double norm = 1; // P(k) norm
-  double gamma = 3;
+  double norm; // P(k) norm
+  double gamma;
   unsigned q;
   double p = 0.1;
   double bs, bi, gs, gi;
@@ -105,7 +94,7 @@ private:
     bi /= mbi;
     gs /= mgs;
     gi /= mgi;
-    // std::cout << mbi << ' ' << mgi << ' ' << mbs << ' ' << mgs << std::endl;
+    // cout << bs << ' ' << bi << ' ' << gs << ' ' << gi << std::endl;
   }
 };
 
